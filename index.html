@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAMOR Wissam — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0c10;
+  --s1: #111318;
+  --s2: #181c24;
+  --border: #1e2430;
+  --green: #00ff88;
+  --blue: #00c4ff;
+  --muted: #4a5568;
+  --text: #e2e8f0;
+  --dim: #8892a4;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+.cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  position: fixed;
+  width: 28px; height: 28px;
+  border: 1px solid rgba(0,255,136,0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: all 0.12s ease;
+  mix-blend-mode: screen;
+}
+
+/* CANVAS */
+#matrix-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* GRID */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+}
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 0 60px;
+}
+
+.hero-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 0.6s 0.2s ease forwards;
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+}
+
+.status-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+}
+
+.hero-name {
+  font-size: clamp(48px, 8vw, 88px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.35s ease forwards;
+}
+
+.hero-name .first { color: var(--text); }
+.hero-name .last {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--green);
+}
+
+.hero-role {
+  margin-top: 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.5s ease forwards;
+}
+
+.hero-role::before {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--blue);
+}
+
+.hero-desc {
+  margin-top: 28px;
+  max-width: 500px;
+  font-size: 16px;
+  color: var(--dim);
+  line-height: 1.7;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.65s ease forwards;
+}
+
+.hero-desc strong { color: var(--text); }
+
+.hero-cta {
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.8s ease forwards;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 12px 24px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 2px solid var(--green);
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: var(--green);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--blue);
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 12px 24px;
+  border-radius: 4px;
+  text-decoration: none;
+  border: 2px solid rgba(0,196,255,0.3);
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--blue);
+  background: rgba(0,196,255,0.05);
+}
+
+.hero-scroll {
+  margin-top: 60px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  opacity: 0;
+  animation: fadeUp 0.7s 1s ease forwards;
+}
+
+.scroll-line {
+  width: 40px; height: 1px;
+  background: var(--muted);
+  position: relative;
+  overflow: hidden;
+}
+
+.scroll-line::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: var(--green);
+  animation: scanline 2s 1.5s ease-in-out infinite;
+}
+
+@keyframes scanline {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ─── SECTION ─── */
+.section { padding: 80px 0; border-top: 1px solid var(--border); }
+
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::before {
+  content: '//';
+  color: var(--muted);
+}
+
+.section-title {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 40px;
+}
+
+/* ─── PARCOURS TIMELINE ─── */
+.timeline { position: relative; padding-left: 28px; }
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--green), var(--blue), transparent);
+}
+
+.tl-entry {
+  position: relative;
+  margin-bottom: 36px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.5s ease;
+}
+
+.tl-entry.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.tl-entry::before {
+  content: '';
+  position: absolute;
+  left: -32px; top: 8px;
+  width: 9px; height: 9px;
+  background: var(--green);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+.tl-year {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+  margin-bottom: 4px;
+}
+
+.tl-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.tl-sub {
+  font-size: 13px;
+  color: var(--dim);
+}
+
+.tl-badge {
+  display: inline-flex;
+  margin-top: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  padding: 3px 9px;
+  background: rgba(0,255,136,0.06);
+  border: 1px solid rgba(0,255,136,0.15);
+  color: var(--green);
+  border-radius: 3px;
+}
+
+/* ─── À PROPOS ─── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 40px;
+  align-items: start;
+}
+
+@media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; gap: 32px; } }
+
+.about-text {
+  font-size: 15px;
+  color: var(--dim);
+  line-height: 1.8;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.stat-item {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 16px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.stat-item:hover { border-color: rgba(0,255,136,0.25); }
+
+.stat-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--green);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* COMPÉTENCES BLOCK */
+.competences-block {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.comp-group {}
+
+.comp-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--green);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.domains-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.domain-pill {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 7px 16px;
+  font-size: 12px;
+  color: var(--dim);
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.domain-pill:hover {
+  border-color: rgba(0,255,136,0.3);
+  color: var(--text);
+}
+
+.domain-pill.green {
+  border-color: rgba(0,255,136,0.2);
+  color: var(--green);
+  background: rgba(0,255,136,0.04);
+}
+
+.domain-pill.blue {
+  border-color: rgba(0,196,255,0.2);
+  color: var(--blue);
+  background: rgba(0,196,255,0.04);
+}
+
+/* ─── EXPÉRIENCES ─── */
+.xp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.xp-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px 24px;
+  transition: all 0.25s;
+}
+
+.xp-card:hover {
+  border-color: rgba(0,196,255,0.2);
+  transform: translateX(4px);
+}
+
+.xp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.xp-company {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.xp-period {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.xp-role {
+  font-size: 13px;
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.xp-badge-row { margin-bottom: 10px; }
+
+.xp-badge {
+  display: inline-flex;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.xp-badge.alt { background: rgba(0,255,136,0.08); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
+.xp-badge.stage { background: rgba(0,196,255,0.08); color: var(--blue); border: 1px solid rgba(0,196,255,0.2); }
+.xp-badge.first { background: rgba(255,200,80,0.08); color: #ffc850; border: 1px solid rgba(255,200,80,0.2); }
+
+.xp-desc {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+.xp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  border-radius: 3px;
+}
+
+.tag.green { background: rgba(0,255,136,0.06); border-color: rgba(0,255,136,0.15); color: var(--green); }
+.tag.blue { background: rgba(0,196,255,0.06); border-color: rgba(0,196,255,0.15); color: var(--blue); }
+
+/* ─── PORTFOLIO CTA CARD ─── */
+.portfolio-cta-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: var(--s1);
+  border: 1px solid rgba(0,255,136,0.25);
+  border-radius: 12px;
+  padding: 28px 32px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.portfolio-cta-card:hover {
+  border-color: var(--green);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,255,136,0.08);
+}
+
+.portfolio-cta-card:hover .pcta-glow {
+  opacity: 1;
+}
+
+.portfolio-cta-card:hover .pcta-arrow {
+  transform: translateX(4px);
+  color: var(--green);
+}
+
+.pcta-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 0% 50%, rgba(0,255,136,0.06) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.pcta-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex: 1;
+}
+
+.pcta-icon {
+  width: 52px; height: 52px;
+  background: rgba(0,255,136,0.06);
+  border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.pcta-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+
+.pcta-url {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.pcta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pcta-tags span {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  padding: 3px 9px;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  border-radius: 3px;
+}
+
+.pcta-arrow {
+  color: var(--dim);
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+
+@media (max-width: 500px) {
+  .portfolio-cta-card { flex-direction: column; align-items: flex-start; }
+  .pcta-arrow { display: none; }
+}
+
+/* ─── CONTACT ─── */
+.contact-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.contact-link:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.contact-link svg { flex-shrink: 0; }
+
+/* ─── GLITCH ─── */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before, .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  background: var(--bg);
+  clip-path: inset(0);
+}
+
+.glitch::before {
+  color: var(--blue);
+  animation: glitch1 3.5s infinite;
+}
+
+.glitch::after {
+  color: var(--green);
+  animation: glitch2 3.5s infinite;
+}
+
+@keyframes glitch1 {
+  0%,94%,100% { clip-path: inset(100% 0 0 0); transform: translate(0); }
+  95% { clip-path: inset(30% 0 50% 0); transform: translate(-3px, 1px); }
+  97% { clip-path: inset(60% 0 10% 0); transform: translate(3px, -1px); }
+}
+
+@keyframes glitch2 {
+  0%,96%,100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  97% { clip-path: inset(10% 0 70% 0); transform: translate(3px, 2px); }
+  99% { clip-path: inset(50% 0 30% 0); transform: translate(-3px, -1px); }
+}
+
+/* ─── TERMINAL TYPING ─── */
+.terminal-box {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-top: 32px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+}
+
+.terminal-header {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.t-dot { width: 12px; height: 12px; border-radius: 50%; }
+.t-red { background: #ff5f57; }
+.t-yellow { background: #ffbd2e; }
+.t-green { background: #28c840; }
+
+.terminal-line { color: var(--dim); margin-bottom: 4px; }
+.terminal-line .prompt { color: var(--green); }
+.terminal-line .cmd { color: var(--text); }
+.terminal-line .out { color: var(--blue); }
+
+.cursor-blink {
+  display: inline-block;
+  width: 8px; height: 14px;
+  background: var(--green);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── FOOTER ─── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .wrap { padding: 0 20px 60px; }
+  .hero { min-height: auto; padding: 60px 0 40px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<canvas id="matrix-canvas"></canvas>
+<div class="grid-bg"></div>
+
+<div class="wrap">
+
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <div class="hero-top">
+      <div class="status-dot"></div>
+      <span class="status-text">DISPONIBLE ALTERNANCE · SEPT. 2026</span>
+    </div>
+
+    <h1 class="hero-name">
+      <span class="first">HAMOR<br></span>
+      <span class="last glitch" data-text="WISSAM">WISSAM</span>
+    </h1>
+
+    <div class="hero-role">Étudiant M1 Sécurité des Systèmes & Réseaux</div>
+
+    <p class="hero-desc">
+      Passionné par les <strong>réseaux et la cybersécurité</strong>, en Licence Pro MRIT-ASUR à Paris-Saclay en alternance chez <strong>Syndex</strong>. Bac+3 orienté administration, sécurité des réseaux et systèmes.
+    </p>
+
+    <div class="hero-cta">
+      <a href="https://www.linkedin.com/in/wissam-h" target="_blank" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://sites.google.com/cy-tech.fr/hamor-wissam/accueil" target="_blank" class="btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Portfolio complet ↗
+      </a>
+    </div>
+
+    <div class="terminal-box">
+      <div class="terminal-header">
+        <div class="t-dot t-red"></div>
+        <div class="t-dot t-yellow"></div>
+        <div class="t-dot t-green"></div>
+      </div>
+      <div class="terminal-line"><span class="prompt">wissam@cyber:~$</span> <span class="cmd" id="typed"></span><span class="cursor-blink" id="tcursor"></span></div>
+      <div class="terminal-line" id="toutput" style="display:none"><span class="out"></span></div>
+    </div>
+
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>SCROLL</span>
+    </div>
+  </section>
+
+  <!-- ══ PARCOURS ══ -->
+  <section class="section" id="parcours">
+    <div class="section-label">01 · Formation</div>
+    <h2 class="section-title">Mon Parcours</h2>
+
+    <div class="timeline">
+      <div class="tl-entry">
+        <div class="tl-year">2025 — 2026</div>
+        <div class="tl-title">Licence Pro MRIT — Administration & Sécurité des Réseaux</div>
+        <div class="tl-sub">Université Paris-Saclay · En alternance chez <strong style="color:var(--blue)">Syndex</strong></div>
+        <span class="tl-badge">Bac +3 · MRIT ASUR · Cybersécurité</span>
+      </div>
+
+      <div class="tl-entry">
+        <div class="tl-year">2023 — 2025</div>
+        <div class="tl-title">BTS SIO option SISR</div>
+        <div class="tl-sub">Lycée Auguste Blanqui, Saint-Ouen · Solutions d'infrastructure, systèmes et réseaux</div>
+        <span class="tl-badge">Bac +2 · Mention Informatique</span>
+      </div>
+
+      <div class="tl-entry">
+        <div class="tl-year">2020 — 2023</div>
+        <div class="tl-title">Bac Pro Systèmes Numériques option RISC</div>
+        <div class="tl-sub">Lycée La Tournelle, La Garenne-Colombes · Réseaux informatiques et systèmes communicants · <em style="color:var(--green)">Mention Assez Bien</em></div>
+        <span class="tl-badge">Baccalauréat Professionnel</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ COMPÉTENCES ══ -->
+  <!-- ══ À PROPOS ══ -->
+  <section class="section" id="about">
+    <div class="section-label">02 · À propos</div>
+    <h2 class="section-title">Qui suis-je ?</h2>
+
+    <div class="about-grid">
+      <div class="about-text">
+        <p>Avec 6 ans de formation dans l'IT, j'ai eu la chance de traverser <strong style="color:var(--green)">tous les grands métiers de l'informatique</strong> — de la maintenance matérielle et de l'électricité en Bac Pro, à l'administration systèmes et réseaux en BTS, jusqu'à la cybersécurité en Licence Pro.</p>
+        <p style="margin-top:16px">Ce parcours progressif m'a donné une vision globale et concrète des infrastructures IT. Chaque expérience, dans des secteurs très différents (logement social, forestier, informatique, syndicat), m'a appris à m'adapter rapidement et à être <strong style="color:var(--blue)">opérationnel dès le premier jour</strong>.</p>
+        <p style="margin-top:16px">Aujourd'hui en alternance chez <strong style="color:var(--green)">Syndex</strong> en tant qu'Administrateur Systèmes & Réseaux, je me spécialise en cybersécurité et vise une <strong style="color:var(--text)">alternance en M1 Sécurité des Systèmes & Réseaux</strong> à partir de septembre 2026.</p>
+      </div>
+
+      <div class="about-stats">
+        <div class="stat-item">
+          <div class="stat-num" data-target="6">0</div>
+          <div class="stat-label">ans de formation IT</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="8">0</div>
+          <div class="stat-label">expériences en entreprise</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="3">0</div>
+          <div class="stat-label">diplômes obtenus</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="4">0</div>
+          <div class="stat-label">secteurs d'activité</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPÉTENCES CLÉS -->
+    <div class="competences-block">
+      <div class="comp-group">
+        <div class="comp-title">Support & Services</div>
+        <div class="domains-row">
+          <div class="domain-pill">Gestion incidents GLPI</div>
+          <div class="domain-pill">Enrôlement Azure AD / Intune</div>
+          <div class="domain-pill">Active Directory</div>
+          <div class="domain-pill">Modes opératoires</div>
+        </div>
+      </div>
+      <div class="comp-group">
+        <div class="comp-title">Systèmes</div>
+        <div class="domains-row">
+          <div class="domain-pill">Windows 10/11 · Server 2016/2019</div>
+          <div class="domain-pill">Linux (Ubuntu, Debian, Kali)</div>
+          <div class="domain-pill">MacOS</div>
+          <div class="domain-pill green">Azure · PowerShell</div>
+          <div class="domain-pill">Virtualisation VM</div>
+        </div>
+      </div>
+      <div class="comp-group">
+        <div class="comp-title">Réseaux</div>
+        <div class="domains-row">
+          <div class="domain-pill">Switches & routeurs Cisco / HP / Aruba</div>
+          <div class="domain-pill green">SD-WAN</div>
+          <div class="domain-pill">Pare-feu Stormshield & Palo Alto</div>
+        </div>
+      </div>
+      <div class="comp-group">
+        <div class="comp-title">Cybersécurité</div>
+        <div class="domains-row">
+          <div class="domain-pill green">Defender for Office 365</div>
+          <div class="domain-pill green">Entra ID / MFA</div>
+          <div class="domain-pill">EDR / XDR</div>
+          <div class="domain-pill">Tests de phishing</div>
+          <div class="domain-pill blue">Charte informatique & IA</div>
+          <div class="domain-pill">RGPD</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ EXPÉRIENCES ══ -->
+  <section class="section" id="experience">
+    <div class="section-label">02b · Expériences</div>
+    <h2 class="section-title">Expériences Professionnelles</h2>
+
+    <div class="xp-list">
+
+      <div class="xp-card tl-entry">
+        <div class="xp-header">
+          <div>
+            <div class="xp-company">Syndex — Paris</div>
+            <div class="xp-role">Alternant · Administrateur Systèmes & Réseaux</div>
+          </div>
+          <div class="xp-period">09/2025 — 09/2026</div>
+        </div>
+        <div class="xp-badge-row"><span class="xp-badge alt">Alternance</span></div>
+        <p class="xp-desc">Traitement des incidents et demandes utilisateurs via GLPI sur environnements Windows 11 et macOS. Conception d'un script PowerShell planifié mensuellement pour sauvegarder les utilisateurs et groupes Intune, exécuté sur une VM Azure via Azure Bastion. Projet de déploiement SD-WAN sur le site de Lyon pour l'amélioration et le renforcement des liaisons réseau. Conception d'agents IA pour l'automatisation de tâches via Power Automate, Power Apps et Microsoft Graph API.</p>
+        <div class="xp-tags">
+          <span class="tag green">Azure</span><span class="tag green">PowerShell</span><span class="tag">GLPI</span><span class="tag blue">SD-WAN</span><span class="tag">Intune</span><span class="tag">Power Automate</span>
+        </div>
+      </div>
+
+      <div class="xp-card tl-entry">
+        <div class="xp-header">
+          <div>
+            <div class="xp-company">Toit et Joie — Groupe La Poste · Paris</div>
+            <div class="xp-role">Stagiaire · Administrateur Systèmes & Réseaux</div>
+          </div>
+          <div class="xp-period">01/2025 — 02/2025</div>
+        </div>
+        <div class="xp-badge-row"><span class="xp-badge stage">Stage BTS</span></div>
+        <p class="xp-desc">Enrôlement et gestion de postes de travail et de smartphones dans un environnement Microsoft Intune. Rédaction d'un mode opératoire pour l'enrôlement et l'administration des terminaux mobiles. Participation à un audit de sécurité (Groupe La Poste), avec réalisation de tests et mise en œuvre de correctifs et ajustements d'infrastructure.</p>
+        <div class="xp-tags">
+          <span class="tag">Intune</span><span class="tag green">Audit sécurité</span><span class="tag blue">MDM</span><span class="tag">Documentation</span>
+        </div>
+      </div>
+
+      <div class="xp-card tl-entry">
+        <div class="xp-header">
+          <div>
+            <div class="xp-company">IPREC · Paris</div>
+            <div class="xp-role">Stagiaire · Coordinateur de projets informatiques</div>
+          </div>
+          <div class="xp-period">03/2024 — 04/2024</div>
+        </div>
+        <div class="xp-badge-row"><span class="xp-badge stage">Stage BTS</span></div>
+        <p class="xp-desc">Participation à la rénovation complète de l'infrastructure réseau, incluant le recâblage intégral de la baie informatique. Migration de données vers une infrastructure cloud, avec application des règles de sécurité et de conformité RGPD.</p>
+        <div class="xp-tags">
+          <span class="tag">Infrastructure réseau</span><span class="tag blue">Migration cloud</span><span class="tag">RGPD</span><span class="tag green">Baie info</span>
+        </div>
+      </div>
+
+      <div class="xp-card tl-entry">
+        <div class="xp-header">
+          <div>
+            <div class="xp-company">Caisse des Dépôts et Consignations · Paris</div>
+            <div class="xp-role">Stagiaire · Direction Système d'Information</div>
+          </div>
+          <div class="xp-period">2022 — 2023</div>
+        </div>
+        <div class="xp-badge-row"><span class="xp-badge stage">Stage Bac Pro</span></div>
+        <p class="xp-desc">Déploiement et gestion d'applications via ManageEngine avec packages automatisés. Supervision du cycle de vie applicatif (installation, mises à jour, maintenance). Participation à l'administration et à la mise à jour des systèmes. Ces missions ont été conduites sur deux périodes consécutives, permettant un approfondissement progressif des responsabilités.</p>
+        <div class="xp-tags">
+          <span class="tag">ManageEngine</span><span class="tag blue">Déploiement</span><span class="tag">Administration sys</span>
+        </div>
+      </div>
+
+      <div class="xp-card tl-entry">
+        <div class="xp-header">
+          <div>
+            <div class="xp-company">IPREC · Paris</div>
+            <div class="xp-role">Stagiaire · Technicien Maintenance Informatique</div>
+          </div>
+          <div class="xp-period">2022</div>
+        </div>
+        <div class="xp-badge-row"><span class="xp-badge stage">Stage Bac Pro</span></div>
+        <p class="xp-desc">Déploiement de parcs et réseaux informatiques, résolution d'incidents et mise en œuvre du support technique. Gestion et sécurisation des parcs informatiques en environnement multi-sites.</p>
+        <div class="xp-tags">
+          <span class="tag">Maintenance parc</span><span class="tag blue">Support</span><span class="tag">Réseaux</span>
+        </div>
+      </div>
+
+      <div class="xp-card tl-entry">
+        <div class="xp-header">
+          <div>
+            <div class="xp-company">Velco · Paris</div>
+            <div class="xp-role">Stagiaire · Technicien de Maintenance</div>
+          </div>
+          <div class="xp-period">2022</div>
+        </div>
+        <div class="xp-badge-row"><span class="xp-badge stage">Stage Bac Pro</span></div>
+        <p class="xp-desc">Paramétrage et configuration de caméras de surveillance IP pour la police municipale. Intervention sur des équipements de sécurité physique en environnement sensible.</p>
+        <div class="xp-tags">
+          <span class="tag green">Caméras IP</span><span class="tag">Surveillance</span><span class="tag blue">Sécurité physique</span>
+        </div>
+      </div>
+
+      <div class="xp-card tl-entry">
+        <div class="xp-header">
+          <div>
+            <div class="xp-company">1001 Vies Habitat</div>
+            <div class="xp-role">Stagiaire · Observation Informatique</div>
+          </div>
+          <div class="xp-period">2019</div>
+        </div>
+        <div class="xp-badge-row"><span class="xp-badge first">Premier stage</span></div>
+        <p class="xp-desc">Configuration et préparation de postes de travail sous Windows 10. Visite technique du datacenter de l'entreprise avec découverte des infrastructures et des environnements serveurs — premier contact concret avec le monde de l'IT.</p>
+        <div class="xp-tags">
+          <span class="tag">Windows 10</span><span class="tag blue">Datacenter</span><span class="tag">Infrastructure</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ PORTFOLIO CTA ══ -->
+  <section class="section" id="contact">
+    <div class="section-label">03 · Portfolio & Contact</div>
+    <h2 class="section-title">Explore mon Portfolio</h2>
+
+    <p style="color:var(--dim);font-size:15px;line-height:1.7;max-width:520px;margin-bottom:32px">
+      Retrouve l'ensemble de mes travaux — TPs, projets, rapports de stage, certifications — organisés par formation sur mon portfolio complet.
+    </p>
+
+    <!-- BIG PORTFOLIO CARD -->
+    <a href="https://sites.google.com/cy-tech.fr/hamor-wissam/accueil" target="_blank" class="portfolio-cta-card">
+      <div class="pcta-left">
+        <div class="pcta-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        </div>
+        <div>
+          <div class="pcta-title">Portfolio complet de HAMOR Wissam</div>
+          <div class="pcta-url">sites.google.com/cy-tech.fr/hamor-wissam</div>
+          <div class="pcta-tags">
+            <span>LP MRIT ASUR</span>
+            <span>BTS SIO SISR</span>
+            <span>Bac Pro RISC</span>
+            <span>Certifications</span>
+            <span>Stages</span>
+          </div>
+        </div>
+      </div>
+      <div class="pcta-arrow">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+      <div class="pcta-glow"></div>
+    </a>
+
+    <!-- SECONDARY LINKS -->
+    <div class="contact-row" style="margin-top:20px">
+      <a href="https://www.linkedin.com/in/wissam-h" target="_blank" class="contact-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>© 2024–2026 HAMOR Wissam · Tous droits réservés</span>
+    <span style="color:var(--green)">Designed by HAMOR Wissam</span>
+  </footer>
+
+</div>
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx+'px'; cur.style.top = my+'px';
+});
+
+function animCursor() {
+  rx += (mx-rx)*0.12; ry += (my-ry)*0.12;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+
+document.querySelectorAll('a,button').forEach(el => {
+  el.addEventListener('mouseenter', ()=>{
+    ring.style.width='48px'; ring.style.height='48px';
+    ring.style.borderColor='rgba(0,255,136,0.7)';
+  });
+  el.addEventListener('mouseleave', ()=>{
+    ring.style.width='28px'; ring.style.height='28px';
+    ring.style.borderColor='rgba(0,255,136,0.4)';
+  });
+});
+
+/* ── MATRIX RAIN ── */
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+let cols, drops;
+
+function initMatrix() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cols = Math.floor(canvas.width / 20);
+  drops = Array(cols).fill(1);
+}
+initMatrix();
+window.addEventListener('resize', initMatrix);
+
+const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(10,12,16,0.05)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#00ff88';
+  ctx.font = '14px monospace';
+  drops.forEach((y,i) => {
+    const c = chars[Math.floor(Math.random()*chars.length)];
+    ctx.fillText(c, i*20, y*20);
+    if (y*20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}
+setInterval(drawMatrix, 50);
+
+/* ── SCROLL REVEAL ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((e,i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.tl-entry, .xp-card').forEach(el => observer.observe(el));
+
+/* ── COUNTER ANIMATION ── */
+const counterObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseInt(el.dataset.target);
+      let count = 0;
+      const step = Math.ceil(target / 20);
+      const timer = setInterval(() => {
+        count = Math.min(count + step, target);
+        el.textContent = count;
+        if (count >= target) clearInterval(timer);
+      }, 60);
+      counterObs.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObs.observe(el));
+
+/* ── TERMINAL TYPING ── */
+const lines = [
+  { cmd: 'whoami', out: '→ HAMOR Wissam · Admin Sys & Réseaux · Futur M1 Cyber' },
+  { cmd: 'cat objectif.txt', out: '→ Alternance M1 Sécurité des Systèmes & Réseaux · Sept. 2026' },
+  { cmd: 'cat certifications.txt', out: '→ TOEIC 925/990 · Cisco CyberOps · English for IT 1&2 · SecNumAcademy' },
+  { cmd: 'ls ./experiences/', out: '→ Syndex  ToitEtJoie  IPREC  CaisseDepots  Velco  1001ViesHabitat' },
+];
+
+let li=0, ci=0, typing=true, pause=0;
+
+function typeTerminal() {
+  const typed = document.getElementById('typed');
+  const tout = document.getElementById('toutput');
+  const line = lines[li];
+
+  if (pause > 0) { pause--; setTimeout(typeTerminal, 40); return; }
+
+  if (typing) {
+    if (ci < line.cmd.length) {
+      typed.textContent += line.cmd[ci++];
+      setTimeout(typeTerminal, 60 + Math.random()*40);
+    } else {
+      tout.querySelector('.out').textContent = line.out;
+      tout.style.display = 'block';
+      typing = false; pause = 40;
+      setTimeout(typeTerminal, 40);
+    }
+  } else {
+    tout.style.display = 'none';
+    typed.textContent = '';
+    ci = 0; typing = true;
+    li = (li+1) % lines.length;
+    pause = 10;
+    setTimeout(typeTerminal, 40);
+  }
+}
+setTimeout(typeTerminal, 1500);
+</script>
+</body>
+</html>
